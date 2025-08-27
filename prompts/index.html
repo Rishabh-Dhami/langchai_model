@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangChain Prompt Learner</title>
+    <style>
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #d6e8f5 50%, #e8f0fe 100%);
+            min-height: 100vh;
+            line-height: 1.6;
+            color: #334155;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 12px;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .logo::before {
+            content: '✨';
+            font-size: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #64748b;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Main Card & Sections */
+        .main-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .input-section {
+            padding: 2rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .results-section {
+            padding: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            margin-right: 0.5rem;
+        }
+        
+        .input-section .section-title::before { content: '📝'; }
+        .results-section .section-title::before { content: '⚡'; }
+
+        /* Form Group Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group label span {
+            font-weight: 400;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        .form-group textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: white;
+        }
+        
+        .form-group ::placeholder {
+            color: #94a3b8;
+        }
+
+        /* Input Controls & Buttons */
+        .input-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .char-count {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary { background: #f1f5f9; color: #64748b; }
+        .btn-secondary:hover { background: #e2e8f0; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Results Area */
+        #resultsArea {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            min-height: 200px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            color: #334155;
+        }
+
+        /* States: Loading, Placeholder, Error */
+        .loading, .placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            text-align: center;
+        }
+        .loading { color: #64748b; }
+        .placeholder { color: #94a3b8; }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .placeholder-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .error {
+            background: #fef2f2;
+            border: 2px solid #fecaca;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        /* Tips Section */
+        .tips-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            padding: 2rem;
+        }
+
+        .tips-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .tips-title::before {
+            content: '💡';
+            margin-right: 0.5rem;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .tip {
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .tip h4 {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .tip p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            h1 { font-size: 2rem; }
+            .input-section, .results-section, .tips-card { padding: 1.5rem; }
+            .button-group { flex-direction: column; width: 100%; }
+            button { width: 100%; justify-content: center; }
+            .input-controls { flex-direction: column; gap: 1rem; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo"></div>
+            <h1>LangChain Prompt Learner</h1>
+            <p class="subtitle">
+                Experiment with structured prompts and see how the AI responds. 
+                Fill out the fields below to craft your request.
+            </p>
+        </div>
+
+        <!-- Main Interface -->
+        <div class="main-card">
+            <!-- Input Section -->
+            <div class="input-section">
+                <h2 class="section-title">Craft Your Request</h2>
+                
+                <div class="form-group">
+                    <label for="taskInput">Task <span>(Required)</span></label>
+                    <input type="text" id="taskInput" placeholder="e.g., Summarize the provided text into three bullet points.">
+                </div>
+
+                <div class="form-group">
+                    <label for="contextInput">Context <span>(Optional)</span></label>
+                    <textarea id="contextInput" placeholder="Paste any relevant text, data, or background information here..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="formatInput">Format Instructions <span>(Optional)</span></label>
+                    <input type="text" id="formatInput" placeholder="e.g., Use markdown for the bullet points.">
+                </div>
+                
+                <div class="input-controls">
+                    <span class="char-count" id="charCount">Context: 0 characters</span>
+                    <div class="button-group">
+                        <button type="button" class="btn-secondary" id="clearBtn">
+                            🗑️ Clear
+                        </button>
+                        <button type="button" class="btn-primary" id="generateBtn">
+                            <span id="btnText">🚀 Generate</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section">
+                <h2 class="section-title">Generated Response</h2>
+                <div id="resultsArea">
+                    <div class="placeholder">
+                        <div class="placeholder-icon">✨</div>
+                        <div>
+                            <p><strong>Your generated response will appear here</strong></p>
+                            <p>Fill out the fields and click Generate to start</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tips Section -->
+        <div class="tips-card">
+            <h3 class="tips-title">Prompt Writing Tips</h3>
+            <div class="tips-grid">
+                <div class="tip">
+                    <h4>Be Specific</h4>
+                    <p>Clear and detailed tasks produce better results than vague ones.</p>
+                </div>
+                <div class="tip">
+                    <h4>Provide Context</h4>
+                    <p>Give background information to help the model understand your request.</p>
+                </div>
+                <div class="tip">
+                    <h4>Use Examples</h4>
+                    <p>Show the format or style you want in your output with concrete examples.</p>
+                </div>
+                <div class="tip">
+                    <h4>Iterate & Refine</h4>
+                    <p>Experiment with different phrasings to improve your results.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const taskInput = document.getElementById('taskInput');
+        const contextInput = document.getElementById('contextInput');
+        const formatInput = document.getElementById('formatInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const resultsArea = document.getElementById('resultsArea');
+        const charCount = document.getElementById('charCount');
+        const btnText = document.getElementById('btnText');
+
+        // State
+        let isGenerating = false;
+
+        // Event Listeners
+        contextInput.addEventListener('input', updateCharCount);
+        generateBtn.addEventListener('click', generateResponse);
+        clearBtn.addEventListener('click', clearAll);
+        
+        // Add keydown listener to all inputs for Ctrl+Enter
+        [taskInput, contextInput, formatInput].forEach(input => {
+            input.addEventListener('keydown', handleKeyPress);
+        });
+
+        // Functions
+        function updateCharCount() {
+            const count = contextInput.value.length;
+            charCount.textContent = `Context: ${count} characters`;
+        }
+
+        function handleKeyPress(event) {
+            if (event.ctrlKey && event.key === 'Enter') {
+                event.preventDefault();
+                generateResponse();
+            }
+        }
+
+        async function generateResponse() {
+            const task = taskInput.value.trim();
+            const context = contextInput.value.trim();
+            // Provide a default if the format instructions are empty
+            const format_instructions = formatInput.value.trim() || "Provide the response as plain text.";
+            
+            if (!task) {
+                showError("The 'Task' field is required. Please enter a task to generate.");
+                return;
+            }
+
+            if (isGenerating) return;
+
+            isGenerating = true;
+            generateBtn.disabled = true;
+            btnText.innerHTML = '⏳ Generating...';
+
+            // Show loading state
+            resultsArea.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div>Processing your request...</div>
+                    <div style="font-size: 0.9rem; margin-top: 0.5rem; color: #94a3b8;">This may take a few moments</div>
+                </div>
+            `;
+
+            try {
+                // The API endpoint for your Flask app
+                const API_URL = "http://127.0.0.1:5000/ask";
+                console.log(task, format_instructions, context);
+                
+
+                const res = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    // Send the structured JSON object
+                    body: JSON.stringify({ 
+                        task: task,
+                        context: context,
+                        format_instructions: format_instructions
+                    })
+                });
+
+                if (!res.ok) {
+                    // Handle HTTP errors like 400 or 500
+                    const errorData = await res.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
+                }
+
+                const data = await res.json();
+                
+                // Display the response directly from the 'response' key
+                if (data.response) {
+                    showResult(data.response);
+                } else {
+                    throw new Error("Received an empty response from the server.");
+                }
+
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                showError(`Failed to generate response. Please check the console and ensure your local server is running. Error: ${error.message}`);
+            } finally {
+                isGenerating = false;
+                generateBtn.disabled = false;
+                btnText.innerHTML = '🚀 Generate';
+            }
+        }
+
+        function showResult(result) {
+            resultsArea.innerHTML = '';
+            // Use textContent to prevent HTML injection
+            resultsArea.textContent = result;
+        }
+
+        function showError(message) {
+            resultsArea.innerHTML = `
+                <div class="error">
+                    ⚠️ ${message}
+                </div>
+            `;
+        }
+
+        function clearAll() {
+            taskInput.value = '';
+            contextInput.value = '';
+            formatInput.value = '';
+            resultsArea.innerHTML = `
+                <div class="placeholder">
+                    <div class="placeholder-icon">✨</div>
+                    <div>
+                        <p><strong>Your generated response will appear here</strong></p>
+                        <p>Fill out the fields and click Generate to start</p>
+                    </div>
+                </div>
+            `;
+            updateCharCount();
+            taskInput.focus();
+        }
+
+        // Initialize
+        updateCharCount();
+        taskInput.focus();
+    </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+    "name": null,
+    "input_variables": [
+        "context",
+        "format_instructions",
+        "task"
+    ],
+    "optional_variables": [],
+    "output_parser": null,
+    "partial_variables": {},
+    "metadata": null,
+    "tags": null,
+    "template": "\n        You are a world-class, multi-disciplinary expert AI assistant. Your name is Gemini. \n        You are precise, thorough, and provide comprehensive and accurate responses. \n        You will strictly follow all instructions and formatting requests.\n        **Task:** {task}\n\n        **Context:**\n        {context}\n\n        **Format Instructions:**\n        {format_instructions}\n",
+    "template_format": "f-string",
+    "validate_template": true,
+    "_type": "prompt"
+}
