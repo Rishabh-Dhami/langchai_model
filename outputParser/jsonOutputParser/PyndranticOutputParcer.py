@@ -21,7 +21,7 @@ class People(BaseModel):
     persons: List[Person] = Field(description="List of fictional people")    
 
 
-template = ChatPromptTemplate([
+template = ChatPromptTemplate.from_messages([
     ("system", "You are the number 1 and most helpfull assistent"),
     ("human", "Generate the name , age, city of the friction place {place} of 2 person\n\n"
      "Result should be in this format: {format_instructions}"
