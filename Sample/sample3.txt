@@ -1,0 +1,2 @@
+This is sample text file number 2.
+Testing multi-file loading with LangChain DirectoryLoader.

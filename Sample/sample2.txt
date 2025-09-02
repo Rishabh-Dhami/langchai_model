@@ -1,0 +1,2 @@
+This is sample text file number 1.
+It will be used with DirectoryLoader.

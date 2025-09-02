@@ -1,0 +1,25 @@
+AI-Powered SaaS Dashboard (Multi-Tenant)
+
+Overview:
+This is a Software-as-a-Service (SaaS) application that supports multiple tenants (companies or users).
+Each tenant has its own workspace, data, and user roles.
+
+Features:
+1. Multi-tenant architecture (workspace isolation).
+2. Authentication and role-based access (Owner, Admin, Member).
+3. AI-powered tools (resume scoring, chat with docs, content generation).
+4. Stripe billing integration (Free, Pro, Enterprise plans).
+5. Admin dashboard with analytics and monitoring.
+6. Scalable deployment using Docker and CI/CD.
+
+Tech Stack:
+- Next.js (Frontend)
+- Node.js/Express (Backend)
+- MongoDB (Database)
+- Redis (Caching sessions)
+- NextAuth.js / JWT (Authentication)
+- Stripe (Payments)
+- LangChain + OpenAI (AI features)
+- Vercel/AWS (Deployment)
+
+Use this file to practice with a text loader in LangChain.
